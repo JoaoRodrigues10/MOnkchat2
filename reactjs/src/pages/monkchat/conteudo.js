@@ -1,8 +1,10 @@
-
 import { ContainerConteudo } from './conteudo.styled'
 import { ChatButton, ChatInput, ChatTextArea } from '../../components/outros/inputs'
+import LoadingBar from 'react-top-loading-bar'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 import Api from '../../service/api';
 const api = new Api();
@@ -15,27 +17,38 @@ export default function Conteudo() {
     const [msg, setMsg] = useState('')
 
 
+    const loading = useRef(null)
+
     const atualizar = async () => {
+        loading.current.continuousStart();
+
         const mensagens = await api.listarMensagens(sala);
-        console.log(mensagens);
-        setChat(mensagens)
+        
+        if(mensagens.erro)
+            toast.error(`❌${mensagens.erro}`);
+        else 
+            setChat(mensagens)
+
+        loading.current.complete();
     }
 
     const enviarMensagem = async () => {
         const r = await api.inserirMensagem(sala, usu, msg);
         console.log(r);
         
-        if(!r.erro)
-        alert('Mensagem enviada com sucesso!');
-
-        else
-        alert(`${r.erro}`);
-
-        await atualizar();
+        if(!r.erro) {
+            toast.dark('✨Mensagem enviada com sucesso!✨');
+            await atualizar();
+        } else {
+            toast.error(`❌${r.erro}`);
+        }
+        
     }
     
     return (
         <ContainerConteudo>
+            <ToastContainer />
+            <LoadingBar color="gold" ref={loading} />
             <div className="container-form">
                 <div className="box-sala">
                     <div>

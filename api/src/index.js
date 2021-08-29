@@ -48,6 +48,9 @@ app.get('/chat/:sala', async (req, resp) => {
 
         let sala = await db.tb_sala.findOne({where: { nm_sala: req.params.sala } } );
 
+            if(sala == null ){
+                return resp.send({ erro: 'Sala não encontrada' })
+            }
         let mensagens = await
             db.tb_chat.findAll({
                 where: {
